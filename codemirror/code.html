@@ -45,7 +45,7 @@
     editor.setValue("");    //先代码框的值清空
    // editor.setValue(obj.scriptCode);    //给代码框赋值
     editor.on('change', function(cm, change) {
-        window.parent.jsToFlutter(editor.getValue());
+        window.parent.getCode(editor.getValue());
 
     });
     function flutterToJs(code) {

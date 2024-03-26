@@ -1,17 +1,14 @@
-import 'dart:collection';
-import 'dart:math';
 import 'dart:html';
+import 'dart:math';
 import 'dart:ui' as ui;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
+
 import 'package:flutter/material.dart';
-import 'dart:js' as js;
 import 'package:test_dynamic/analysis_widget.dart';
+import 'package:test_dynamic/attribute/set_attribute_page.dart';
 import 'package:test_dynamic/bean/attribute_bean.dart';
 import 'package:test_dynamic/extension/attribute_ext.dart';
 import 'package:test_dynamic/model/widget_attribute.dart';
 import 'package:test_dynamic/navigation/widget_navigation.dart';
-import 'package:test_dynamic/attribute/set_attribute_page.dart';
 import 'package:test_dynamic/tool/event_bus.dart';
 
 var eventBus = EventBus();
@@ -106,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget widgetUI = Center(
+  Widget widgetUI = const Center(
     child: Text("test"),
   );
 }
@@ -247,7 +244,7 @@ class _DraggableSplitViewState extends State<DraggableSplitView>
                       Container(
                         width: 70,
                         height: 100,
-                        margin: const EdgeInsets.only(left: 15,right: 15),
+                        margin: const EdgeInsets.only(left: 15, right: 15),
                         decoration: const BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.all(Radius.circular(10)),
@@ -255,22 +252,42 @@ class _DraggableSplitViewState extends State<DraggableSplitView>
                               BoxShadow(
                                   color: Colors.red,
                                   blurRadius: 1,
-                                  spreadRadius: 1
-                              )
-                            ]
-                        ),
+                                  spreadRadius: 1)
+                            ]),
                         child: Column(
                           children: [
-                            Expanded(flex: 1,child: TextButton(onPressed: (){
-                              setState(() {
-                                isShowUI = true;
-                              });
-                            }, child: Text("UI",style: TextStyle(fontSize: 14,color:isShowUI? Colors.red:Colors.black),)),),
-                            Expanded(flex: 1,child: TextButton(onPressed: (){
-                              setState(() {
-                                isShowUI = false;
-                              });
-                            }, child: Text("Code",style: TextStyle(fontSize: 14,color:isShowUI? Colors.black:Colors.red))),),
+                            Expanded(
+                              flex: 1,
+                              child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isShowUI = true;
+                                    });
+                                  },
+                                  child: Text(
+                                    "UI",
+                                    style: TextStyle(
+                                        fontSize: 14,
+                                        color: isShowUI
+                                            ? Colors.red
+                                            : Colors.black),
+                                  )),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      isShowUI = false;
+                                    });
+                                  },
+                                  child: Text("Code",
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          color: isShowUI
+                                              ? Colors.black
+                                              : Colors.red))),
+                            ),
                           ],
                         ),
                       ),
@@ -285,7 +302,7 @@ class _DraggableSplitViewState extends State<DraggableSplitView>
                               decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius:
-                                  BorderRadius.all(Radius.circular(5)),
+                                      BorderRadius.all(Radius.circular(5)),
                                   boxShadow: [
                                     BoxShadow(
                                         color: Colors.black,
@@ -295,14 +312,16 @@ class _DraggableSplitViewState extends State<DraggableSplitView>
                               child: widgetUI,
                             ),
                           ),
-                          secondChild: CodemirrorPage(MediaQuery.of(context).size.width * dividerPosition-100),
+                          secondChild: CodemirrorPage(
+                              MediaQuery.of(context).size.width *
+                                      dividerPosition -
+                                  100),
                           crossFadeState: isShowUI
                               ? CrossFadeState.showFirst
                               : CrossFadeState.showSecond,
                           duration: const Duration(seconds: 1),
                         ),
                       ),
-
                     ],
                   ),
                 ),
@@ -420,7 +439,8 @@ class _DraggableSplitViewState extends State<DraggableSplitView>
 
 class CodemirrorPage extends StatefulWidget {
   double width = 800;
-  CodemirrorPage(this.width,{super.key});
+
+  CodemirrorPage(this.width, {super.key});
 
   @override
   State<CodemirrorPage> createState() => _CodemirrorPageState();
@@ -428,16 +448,14 @@ class CodemirrorPage extends StatefulWidget {
 
 class _CodemirrorPageState extends State<CodemirrorPage> {
   DivElement? frame;
+
   @override
   void initState() {
-    js.context["xxx_jsToFlutter"] = jsToFlutter;
     super.initState();
-
   }
 
-  DivElement getFrame(){
-    if(frame==null)
-    {
+  DivElement getFrame() {
+    if (frame == null) {
       frame = DivElement();
       frame!.contentEditable = "true";
       IFrameElement iframe = IFrameElement()
@@ -455,8 +473,6 @@ class _CodemirrorPageState extends State<CodemirrorPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
     // iframe.isContentEditable;
     // //设置token
     // StyleElement sFrame = StyleElement();
@@ -469,12 +485,15 @@ class _CodemirrorPageState extends State<CodemirrorPage> {
     return SingleChildScrollView(
       child: Row(
         children: [
-          TextButton(onPressed: (){
-            flutterTojs();
-          }, child: Text("test",style: TextStyle(fontSize: 14),)),
+          TextButton(
+              onPressed: () {},
+              child: Text(
+                "test",
+                style: TextStyle(fontSize: 14),
+              )),
           Container(
-            width: widget.width -80,
-            height: MediaQuery.of(context).size.height-50,
+            width: widget.width - 80,
+            height: MediaQuery.of(context).size.height - 50,
             child: HtmlElementView(
               viewType: 'codemirror',
             ),
@@ -482,20 +501,6 @@ class _CodemirrorPageState extends State<CodemirrorPage> {
         ],
       ),
     );
-  }
-  //监听代码输入回掉
-  jsToFlutter(String code){
-    print("////////////////////////////////");
-    print(code);
-    print("////////////////////////////////");
-    if(code!=null){
-
-    }
-  }
-  //给代码框传值
-  flutterTojs(){
-
-    js.context.callMethod('flutterToJs',["////////////////////////////////test////////////////////////////////"]);
   }
 }
 
@@ -532,7 +537,7 @@ class RecursiveMenu extends StatelessWidget {
               onPressed: () {
                 item.children.add(MenuItem(title: item.title + 'New Item'));
               },
-              icon: Icon(
+              icon: const Icon(
                 Icons.add,
                 size: 20,
               ),

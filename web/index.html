@@ -25,30 +25,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="test_dynamic">
     <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-<!--    &lt;!&ndash; 核心css文件 &ndash;&gt;-->
-<!--    <link-->
-<!--            rel="stylesheet"-->
-<!--            href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"-->
-<!--            integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="-->
-<!--            crossorigin="anonymous"-->
-<!--            referrerpolicy="no-referrer"-->
-<!--    />-->
-
-<!--    &lt;!&ndash;引入css主题文件，用以支持主题&ndash;&gt;-->
-<!--    <link-->
-<!--            rel="stylesheet"-->
-<!--            href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css"-->
-<!--            integrity="sha512-gFMl3u9d0xt3WR8ZeW05MWm3yZ+ZfgsBVXLSOiFz2xeVrZ8Neg0+V1kkRIo9LikyA/T9HuS91kDfc2XWse0K0A=="-->
-<!--            crossorigin="anonymous"-->
-<!--            referrerpolicy="no-referrer"-->
-<!--    />-->
-<!--    &lt;!&ndash; 引入CodeMirror核心JS &ndash;&gt;-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>-->
-<!--    &lt;!&ndash; 引入特定的模式支持（比如HTML模式） &ndash;&gt;-->
-<!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/htmlmixed/htmlmixed.min.js"></script>-->
-
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="favicon.png"/>
     <title>test_dynamic</title>
     <link rel="manifest" href="manifest.json">
@@ -63,17 +39,27 @@
         // The value below is injected by flutter build, do not touch.
         var serviceWorkerVersion = null;
     </script>
-    <!-- This script adds the flutter initialization JS code -->
     <script src="flutter.js" defer></script>
     <script type="application/javascript" src="/assets/packages/flutter_inappwebview_web/assets/web/web_support.js" defer></script>
 </head>
 <body>
 <script>
-    function jsToFlutter(code){
-        window.xxx_jsToFlutter(code);
+    function getTakePicture(json){
+        window.getTakePicture(code);
 
     }
-    function flutterToJs(code){
+    function setTakePicture(json){
+
+    }
+
+    function setNetData(json){
+
+    }
+    function getNetData(json){
+        window.getNetData(code);
+
+    }
+    function setCode(code){
         var iframe = document.getElementById('codemirror_iframe');
         var iframeWindow = iframe.contentWindow;
         if (iframeWindow) {
