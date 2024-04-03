@@ -407,7 +407,7 @@ class _DraggableSplitViewState extends HookConsumerWidget {
                               ),
                             ),
                             secondChild: CodemirrorPage(
-                                MediaQuery.of(context).size.width * value.state.dividerPosition - 100),
+                                MediaQuery.of(context).size.width * value.state.dividerPosition -(MediaQuery.of(context).size.width *  value.state.dividerPosition) *  value.state.dividerPosition2- 100),
                             crossFadeState:value.state.isShowUI
                                 ? CrossFadeState.showFirst
                                 : CrossFadeState.showSecond,
