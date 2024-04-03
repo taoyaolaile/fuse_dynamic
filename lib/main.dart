@@ -217,7 +217,7 @@ class DraggableSplitViewNotifier extends Notifier<DraggableSplitViewModel> {
   void getWidgetUI(BuildContext context) {
     if (state.att != null && state.attribute != null) {
       // state = state.copyWith(widgetUI:  );
-      state.widgetUI =state.att!.change(context, state.attribute!);
+      state.widgetUI =state.att!.change();
     } else {
       state.widgetUI = const Center();
     }
@@ -269,7 +269,7 @@ class DraggableSplitViewNotifier extends Notifier<DraggableSplitViewModel> {
           key: "ScaffoldAttribute",
           appBar: {"title": "test"},
           body: columnAttribute);
-      state.att = AttributeToWidget(ScaffoldStrategy());
+      state.att = AttributeToWidget(ScaffoldStrategy(state.attribute!));
     }
   }
 }
@@ -305,8 +305,8 @@ class _DraggableSplitViewState extends HookConsumerWidget {
                   //修改UI后回掉
                   var strategy = ScaffoldAttribute.fromJson(map);
                   if (strategy != null) {
-                    var att = AttributeToWidget(ScaffoldStrategy());
-                    value.setWidgetUI(att.change(context, strategy)) ;
+                    var att = AttributeToWidget(ScaffoldStrategy(strategy));
+                    value.setWidgetUI(att.change()) ;
                     value.setAttribute(attr as ScaffoldAttribute);
                     // spn.attribute = ;
                   }
@@ -464,17 +464,17 @@ class _DraggableSplitViewState extends HookConsumerWidget {
                                       AttributeBean().parentAttr = getWidgetByKey(attr, widgetKey);
                                       AttributeBean().parentAttr?.toMap();
                                       spn.attribute = attr as ScaffoldAttribute;
-                                      var att = AttributeToWidget(ScaffoldStrategy());
+                                      var att = AttributeToWidget(ScaffoldStrategy(spn.attribute!));
                                       // spn.widgetUI = ;
-                                      value.setWidgetUI(att.change(context, value.getScaffoldAttribute()));
+                                      value.setWidgetUI(att.change());
                                     }),
                                 SetAttributePage(value.getScaffoldAttribute(), AttributeBean().childAttr, (attr, widgetKey) {
                                   AttributeBean().childAttr = getWidgetByKey(attr, widgetKey);
                                   AttributeBean().childAttr?.toMap();
                                   spn.attribute = attr as ScaffoldAttribute;
-                                  var att = AttributeToWidget(ScaffoldStrategy());
+                                  var att = AttributeToWidget(ScaffoldStrategy( spn.attribute!));
                                   // spn.widgetUI = att.change(context, value.getScaffoldAttribute());
-                                  value.setWidgetUI(att.change(context, value.getScaffoldAttribute()));
+                                  value.setWidgetUI(att.change());
                                 }),
                                 // PolicyListPage(isShowSigned:widget.isShowSigned),
                                 // ChangeNotifierProvider(

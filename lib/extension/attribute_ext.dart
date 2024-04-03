@@ -1,3 +1,4 @@
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:test_dynamic/analysis_widget.dart';
 import 'package:test_dynamic/model/widget_attribute.dart';
 
@@ -165,22 +166,22 @@ extension AttributeExt on WidgetAttribute {
 
     }
   }
-  WidgetStrategy? attributeToStrategy() {
+  HookConsumerWidget? attributeToStrategy() {
     switch (widgetType) {
       case "Row":
-       return RowStrategy();
+       return RowStrategy(this);
       case "Column":
-       return ColumnStrategy();
+       return ColumnStrategy(this);
       case "Expanded":
-        return ExpandedStrategy();
+        return ExpandedStrategy(this);
       case "Flex":
-        return FlexStrategy();
+        return FlexStrategy(this);
       case "Container":
-        return ColumnStrategy();
+        return ColumnStrategy(this);
       case "Scaffold":
-       return ScaffoldStrategy();
+       return ScaffoldStrategy(this);
       case "Text":
-       return TextStrategy();
+       return TextStrategy(this);
       default:
         return null;
     }

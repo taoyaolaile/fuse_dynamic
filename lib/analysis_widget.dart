@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:test_dynamic/extension/map_ext.dart';
 import 'package:test_dynamic/model/widget_attribute.dart';
 import 'package:test_dynamic/tool/tool.dart';
@@ -20,69 +21,75 @@ class AttributeToStrategy {
   AttributeToStrategy._();
 
   static AttributeToStrategy? _singleton;
-  WidgetStrategy? toStrategy(WidgetAttribute attribute){
-      if(attribute is ScaffoldAttribute){
-        return ScaffoldStrategy();
-      } else if(attribute is TextAttribute){
-        return TextStrategy();
-      } else if(attribute is RowAttribute){
-        return RowStrategy();
-      } else if(attribute is ColumnAttribute){
-        return ColumnStrategy();
-      }else if(attribute is FlexAttribute){
-        return FlexStrategy();
-      }
 
-      return null;
+  HookConsumerWidget? toStrategy(WidgetAttribute attribute) {
+    if (attribute is ScaffoldAttribute) {
+      return ScaffoldStrategy(attribute);
+    } else if (attribute is TextAttribute) {
+      return TextStrategy(attribute);
+    } else if (attribute is RowAttribute) {
+      return RowStrategy(attribute);
+    } else if (attribute is ColumnAttribute) {
+      return ColumnStrategy(attribute);
+    } else if (attribute is FlexAttribute) {
+      return FlexStrategy(attribute);
+    }else if (attribute is ExpandedAttribute) {
+      return ExpandedStrategy(attribute);
+    }
+
+    return null;
   }
 }
-typedef WidgetStrategyCallback = WidgetAttribute Function(WidgetAttribute attribute);
-abstract class WidgetStrategy {
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute);
 
-}
+typedef WidgetStrategyCallback = WidgetAttribute Function(
+    WidgetAttribute attribute);
+// abstract class WidgetStrategy {
+//   Widget mapToWidget(BuildContext context,WidgetAttribute attribute);
+//
+// }
 
 class AttributeToWidget {
-  final WidgetStrategy widgetStrategy;
+  final HookConsumerWidget widgetStrategy;
 
   AttributeToWidget(this.widgetStrategy);
 
-  Widget change(BuildContext context,WidgetAttribute attribute) {
-    return widgetStrategy.mapToWidget(context,attribute);
+  Widget change() {
+    return widgetStrategy;
   }
-
 }
 
-class ScaffoldStrategy extends WidgetStrategy {
+class ScaffoldStrategy extends HookConsumerWidget {
   Widget? scaffold;
   late ScaffoldAttribute scaffoldAttribute;
-  @override
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute) {
+  late Map<String, dynamic> data;
+  Widget? body;
+
+  ScaffoldStrategy(WidgetAttribute attribute, {super.key}) {
     scaffoldAttribute = attribute as ScaffoldAttribute;
-      return getWidget(context);
+    data = scaffoldAttribute.toMap();
+    var strategy = AttributeToStrategy().toStrategy(scaffoldAttribute.body);
+    if (strategy != null) {
+      AttributeToWidget attributeToWidget = AttributeToWidget(strategy);
+      body = attributeToWidget.change();
+    }
   }
 
-  Widget getWidget(BuildContext context){
-
-    Map<String, dynamic> data = scaffoldAttribute.toMap();
-    var strategy = AttributeToStrategy().toStrategy(scaffoldAttribute.body);
-    Widget? body;
-    if(strategy!=null){
-      AttributeToWidget attributeToWidget = AttributeToWidget(strategy);
-      body =attributeToWidget.change(context,scaffoldAttribute.body);
-    }
-    scaffold = Scaffold(
+  Widget getWidget() {
+    return Scaffold(
       appBar: getAppBar(data),
-      body:  body,
+      body: body,
     );
-    return scaffold!;
   }
 
   AppBar? getAppBar(Map<String, dynamic> appBar) {
     if (appBar.containsKey('appBar')) {
-      String title = MapExt().getValue(appBar['appBar'],"title",defaultValue:"");
+      String title =
+          MapExt().getValue(appBar['appBar'], "title", defaultValue: "");
       return AppBar(
-        title: Text(title,style: const TextStyle(fontSize: 16,color: Colors.white),),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 16, color: Colors.white),
+        ),
         backgroundColor: Colors.red,
       );
     } else {
@@ -90,198 +97,216 @@ class ScaffoldStrategy extends WidgetStrategy {
     }
   }
 
-
-
-
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return getWidget();
+  }
 }
 
-class RowStrategy extends WidgetStrategy {
+class RowStrategy extends HookConsumerWidget {
   late Widget row;
   late RowAttribute rowAttribute;
-  @override
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute) {
+  late Map<String, dynamic> data;
+  List<Widget> widgets = [];
+
+  RowStrategy(WidgetAttribute attribute) {
     rowAttribute = attribute as RowAttribute;
-    return getWidget(context);
-  }
-  Widget getWidget(BuildContext context) {
-    Map<String, dynamic> data = rowAttribute.toMap();
-    List<Map<String, dynamic>> children = MapExt().getValueListMap(data,"children",defaultValue: []);
-    List<Widget> widgets =[];
-    if(children.isNotEmpty){
+    data = rowAttribute.toMap();
+    List<Map<String, dynamic>> children =
+        MapExt().getValueListMap(data, "children", defaultValue: []);
+    if (children.isNotEmpty) {
       for (var element in children) {
         var elementAttr = MapToAttribute().toAttribute(element);
-        if(elementAttr!=null)
-        {
+        if (elementAttr != null) {
           var strategy = AttributeToStrategy().toStrategy(elementAttr);
-          if(strategy!=null){
+          if (strategy != null) {
             AttributeToWidget attributeToWidget = AttributeToWidget(strategy);
-            widgets.add(attributeToWidget.change(context,elementAttr));
+            widgets.add(attributeToWidget.change());
           }
         }
-
       }
     }
-    row = Row(
-      mainAxisAlignment: Tool().getMainAxisAlignment(MapExt().getValue(data,"mainAxisAlignment",defaultValue: "")),
-      crossAxisAlignment: Tool().getCrossAxisAlignment(MapExt().getValue(data,"crossAxisAlignment",defaultValue: "")),
-      mainAxisSize: Tool().getMainAxisSize(MapExt().getValue(data,"mainAxisSize",defaultValue: "")),
-      textDirection: Tool().getTextDirection(MapExt().getValue(data,"textDirection",defaultValue: "")),
-      verticalDirection: Tool().getVerticalDirection(MapExt().getValue(data,"verticalDirection",defaultValue: "")),
-      textBaseline: Tool().getTextBaseline(MapExt().getValue(data,"textBaseline",defaultValue: "")),
-      children: widgets,
-    );
-    return row;
   }
 
-
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: Tool().getMainAxisAlignment(
+          MapExt().getValue(data, "mainAxisAlignment", defaultValue: "")),
+      crossAxisAlignment: Tool().getCrossAxisAlignment(
+          MapExt().getValue(data, "crossAxisAlignment", defaultValue: "")),
+      mainAxisSize: Tool().getMainAxisSize(
+          MapExt().getValue(data, "mainAxisSize", defaultValue: "")),
+      textDirection: Tool().getTextDirection(
+          MapExt().getValue(data, "textDirection", defaultValue: "")),
+      verticalDirection: Tool().getVerticalDirection(
+          MapExt().getValue(data, "verticalDirection", defaultValue: "")),
+      textBaseline: Tool().getTextBaseline(
+          MapExt().getValue(data, "textBaseline", defaultValue: "")),
+      children: widgets,
+    );
+  }
 }
 
-class ColumnStrategy extends WidgetStrategy {
+class ColumnStrategy extends HookConsumerWidget {
   late Widget column;
   late ColumnAttribute columnAttribute;
-  @override
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute) {
-    columnAttribute = attribute as ColumnAttribute;
-    return getWidget(context);
-  }
+  late Map<String, dynamic> data;
+  List<Widget> widgets = [];
 
-  Widget getWidget(BuildContext context) {
-    Map<String, dynamic> data = columnAttribute.toMap();
-    List<Map<String, dynamic>> children = MapExt().getValueListMap(data,"children",defaultValue: []) ;
-    List<Widget> widgets =[];
-    if(children.isNotEmpty){
+  ColumnStrategy(WidgetAttribute attribute) {
+    columnAttribute = attribute as ColumnAttribute;
+    data = columnAttribute.toMap();
+    List<Map<String, dynamic>> children =
+        MapExt().getValueListMap(data, "children", defaultValue: []);
+    if (children.isNotEmpty) {
       for (var element in children) {
         var elementAttr = MapToAttribute().toAttribute(element);
-        if(elementAttr!=null)
-        {
+        if (elementAttr != null) {
           var strategy = AttributeToStrategy().toStrategy(elementAttr);
-          if(strategy!=null){
+          if (strategy != null) {
             AttributeToWidget attributeToWidget = AttributeToWidget(strategy);
-            widgets.add(attributeToWidget.change(context,elementAttr));
+            widgets.add(attributeToWidget.change());
           }
         }
-
       }
     }
-    column = Column(
-      crossAxisAlignment: Tool().getCrossAxisAlignment(MapExt().getValue(data,"crossAxisAlignment",defaultValue: "")),
-      mainAxisAlignment: Tool().getMainAxisAlignment(MapExt().getValue(data,"mainAxisAlignment",defaultValue: "")),
-      mainAxisSize: Tool().getMainAxisSize(MapExt().getValue(data,"mainAxisSize",defaultValue: "")),
-      textDirection: Tool().getTextDirection(MapExt().getValue(data,"textDirection",defaultValue: "")),
-      verticalDirection: Tool().getVerticalDirection(MapExt().getValue(data,"verticalDirection",defaultValue: "")),
-      textBaseline: Tool().getTextBaseline(MapExt().getValue(data,"textBaseline",defaultValue: "")),
-      children: widgets,
-    );
-    return column;
   }
 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // TODO: implement build
+    return Column(
+      crossAxisAlignment: Tool().getCrossAxisAlignment(
+          MapExt().getValue(data, "crossAxisAlignment", defaultValue: "")),
+      mainAxisAlignment: Tool().getMainAxisAlignment(
+          MapExt().getValue(data, "mainAxisAlignment", defaultValue: "")),
+      mainAxisSize: Tool().getMainAxisSize(
+          MapExt().getValue(data, "mainAxisSize", defaultValue: "")),
+      textDirection: Tool().getTextDirection(
+          MapExt().getValue(data, "textDirection", defaultValue: "")),
+      verticalDirection: Tool().getVerticalDirection(
+          MapExt().getValue(data, "verticalDirection", defaultValue: "")),
+      textBaseline: Tool().getTextBaseline(
+          MapExt().getValue(data, "textBaseline", defaultValue: "")),
+      children: widgets,
+    );
+  }
 }
 
-class FlexStrategy extends WidgetStrategy {
+class FlexStrategy extends HookConsumerWidget {
   late Widget flex;
   late FlexAttribute flexAttribute;
-  @override
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute) {
+  late Map<String, dynamic> data;
+  List<Widget> widgets = [];
+
+  FlexStrategy(WidgetAttribute attribute) {
     flexAttribute = attribute as FlexAttribute;
-    return getWidget(context);
-  }
-  Widget getWidget(BuildContext context) {
-    Map<String, dynamic> data = flexAttribute.toMap();
-    List<Map<String, dynamic>> children = MapExt().getValueListMap(data,"children",defaultValue: []);
-    List<Widget> widgets =[];
-    if(children.isNotEmpty){
+    data = flexAttribute.toMap();
+    List<Map<String, dynamic>> children =
+        MapExt().getValueListMap(data, "children", defaultValue: []);
+
+    if (children.isNotEmpty) {
       for (var element in children) {
         var elementAttr = MapToAttribute().toAttribute(element);
-        if(elementAttr!=null)
-        {
+        if (elementAttr != null) {
           var strategy = AttributeToStrategy().toStrategy(elementAttr);
-          if(strategy!=null){
+          if (strategy != null) {
             AttributeToWidget attributeToWidget = AttributeToWidget(strategy);
-            widgets.add(attributeToWidget.change(context,elementAttr));
+            widgets.add(attributeToWidget.change());
           }
         }
-
       }
     }
-    flex  = Flex(
-      direction: Tool().getFlexDirection(MapExt().getValue(data,"direction",defaultValue: "")),
-      mainAxisAlignment: Tool().getMainAxisAlignment(MapExt().getValue(data,"mainAxisAlignment",defaultValue: "")),
-      mainAxisSize: Tool().getMainAxisSize(MapExt().getValue(data,"mainAxisSize",defaultValue: "")),
-      textDirection: Tool().getTextDirection(MapExt().getValue(data,"textDirection",defaultValue: "")),
-      verticalDirection: Tool().getVerticalDirection(MapExt().getValue(data,"verticalDirection",defaultValue: "")),
-      textBaseline: Tool().getTextBaseline(MapExt().getValue(data,"textBaseline",defaultValue: "")),
-      clipBehavior: Tool().getClipBehavior(MapExt().getValue(data,"clipBehavior",defaultValue: "")),
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // TODO: implement build
+    return Flex(
+      direction: Tool().getFlexDirection(
+          MapExt().getValue(data, "direction", defaultValue: "")),
+      mainAxisAlignment: Tool().getMainAxisAlignment(
+          MapExt().getValue(data, "mainAxisAlignment", defaultValue: "")),
+      mainAxisSize: Tool().getMainAxisSize(
+          MapExt().getValue(data, "mainAxisSize", defaultValue: "")),
+      textDirection: Tool().getTextDirection(
+          MapExt().getValue(data, "textDirection", defaultValue: "")),
+      verticalDirection: Tool().getVerticalDirection(
+          MapExt().getValue(data, "verticalDirection", defaultValue: "")),
+      textBaseline: Tool().getTextBaseline(
+          MapExt().getValue(data, "textBaseline", defaultValue: "")),
+      clipBehavior: Tool().getClipBehavior(
+          MapExt().getValue(data, "clipBehavior", defaultValue: "")),
       children: widgets,
     );
-    return flex;
   }
-
 }
-class ExpandedStrategy extends WidgetStrategy {
+
+class ExpandedStrategy extends HookConsumerWidget {
   late Widget expanded;
-  late  ExpandedAttribute expandedAttribute;
-  @override
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute) {
+  late ExpandedAttribute expandedAttribute;
+  late Map<String, dynamic> data;
+
+  ExpandedStrategy( WidgetAttribute attribute) {
     expandedAttribute = attribute as ExpandedAttribute;
-    return getWidget(context);
+    data = expandedAttribute.toMap();
   }
 
-  Widget getWidget(BuildContext context) {
-    Map<String, dynamic> data = expandedAttribute.toMap();
-    // WidgetAttribute? child = data.getValue("child");
-    // var strategy = AttributeToStrategy().toStrategy();
-    // if(strategy!=null){
-    //   AttributeToWidget attributeToWidget = AttributeToWidget(strategy);
-    //   widgets.add(attributeToWidget.change(element));
-    // }
-    expanded = Expanded(
-      flex: MapExt().getValue(data,"flex",defaultValue: 1),
-      child: MapExt().getValue(data,"child"),
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Expanded(
+      flex: MapExt().getValue(data, "flex", defaultValue: 1),
+      child: MapExt().getValue(data, "child"),
     );
-    return expanded;
   }
-
 }
-class TextStrategy extends WidgetStrategy {
+
+class TextStrategy extends HookConsumerWidget {
   Map<String, dynamic> textMap = {};
   late Widget text;
   TextAttribute? textAttribute;
-  @override
-  Widget mapToWidget(BuildContext context,WidgetAttribute attribute) {
-    textAttribute ??= attribute as TextAttribute;
 
-    return getWidget();
-  }
-  Widget getWidget() {
+  TextStrategy(WidgetAttribute attribute) {
+    textAttribute ??= attribute as TextAttribute;
     textMap = textAttribute!.toMap();
-    text = Text(
-      (MapExt().getValue(textMap,"text") ?? ""),
-      style: getTextStyle(MapExt().getValue(textMap,"style")),
-    );
-    return text;
   }
-  
 
   TextStyle getTextStyle(Map<String, dynamic>? textStyle) {
     if (textStyle == null) {
       return const TextStyle();
     } else {
       Color color = Colors.black;
-      double fontSize=14;
-      if(MapExt().getValue(textStyle,"fontSize",defaultValue:14).toString().isNotEmpty){
-        fontSize = MapExt().getValue(textStyle,"fontSize",defaultValue:14);
+      double fontSize = 14;
+      if (MapExt()
+          .getValue(textStyle, "fontSize", defaultValue: 14)
+          .toString()
+          .isNotEmpty) {
+        fontSize = MapExt().getValue(textStyle, "fontSize", defaultValue: 14);
       }
-      if(MapExt().getValue(textStyle,"color",defaultValue: 0xFF000000).toString().isNotEmpty){
-        color = Color(MapExt().getValue(textStyle,"color"));
+      if (MapExt()
+          .getValue(textStyle, "color", defaultValue: 0xFF000000)
+          .toString()
+          .isNotEmpty) {
+        color = Color(MapExt().getValue(textStyle, "color"));
       }
       return TextStyle(
-          color: color,
-          fontSize: fontSize,
-          fontWeight: Tool().getFontWeight(MapExt().getValue(textStyle,"fontWeight",defaultValue: "")),
-          fontStyle: Tool().getFontStyle(MapExt().getValue(textStyle,"fontStyle",defaultValue: "")),
-          height: MapExt().getValue(textStyle,"height",defaultValue: 1),
+        color: color,
+        fontSize: fontSize,
+        fontWeight: Tool().getFontWeight(
+            MapExt().getValue(textStyle, "fontWeight", defaultValue: "")),
+        fontStyle: Tool().getFontStyle(
+            MapExt().getValue(textStyle, "fontStyle", defaultValue: "")),
+        height: MapExt().getValue(textStyle, "height", defaultValue: 1),
       );
     }
   }
 
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Text(
+      (MapExt().getValue(textMap, "text") ?? ""),
+      style: getTextStyle(MapExt().getValue(textMap, "style")),
+    );
+  }
 }

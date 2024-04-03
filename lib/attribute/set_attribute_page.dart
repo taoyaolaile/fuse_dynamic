@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:js';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:test_dynamic/attribute/attribute_handler.dart';
