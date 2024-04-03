@@ -450,7 +450,7 @@ class _WidgetNavigationState extends State<WidgetNavigation> {
                 var strategy = attr.attributeToStrategy();
                 if (strategy != null) {
                   var widgetStrategy = AttributeToWidget(strategy);
-                  Widget widgetUI = widgetStrategy.change(attr);
+                  Widget widgetUI = widgetStrategy.change(context,attr);
                   return GestureDetector(
                     child: Container(
                       alignment: Alignment.center,

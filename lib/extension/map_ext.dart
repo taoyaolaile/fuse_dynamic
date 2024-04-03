@@ -24,6 +24,14 @@ class MapExt {
       return defaultValue;
     }
   }
+  Map<String, dynamic> setValue(Map<String, dynamic> map, String key,dynamic value) {
+    if (map.containsKey(key)) {
+       map[key] = value;
+       return map;
+    } else {
+      return map;
+    }
+  }
   Map<String,dynamic> getValueMap(Map<String, dynamic> map, String key,
       {Map<String,dynamic>? defaultValue}) {
     if (map.containsKey(key)) {
