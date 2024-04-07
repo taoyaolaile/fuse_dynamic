@@ -5,6 +5,8 @@ import 'package:test_dynamic/extension/map_ext.dart';
 import 'package:test_dynamic/model/widget_attribute.dart';
 import 'package:test_dynamic/tool/tool.dart';
 
+import 'event/event_bus.dart';
+
 ///文件作者 ：陈涛(Ann)
 ///文件名字 ：analysis_widget
 ///创建日期 ：2024/3/8
@@ -270,6 +272,11 @@ class TextStrategy extends HookConsumerWidget {
   TextStrategy(WidgetAttribute attribute) {
     textAttribute ??= attribute as TextAttribute;
     textMap = textAttribute!.toMap();
+    EventBusUtil().eventBus.on<WidgetAttribute>().listen((event) {
+        if(event.key == attribute.key){
+
+        }
+    });
   }
 
   TextStyle getTextStyle(Map<String, dynamic>? textStyle) {
